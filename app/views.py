@@ -1,5 +1,6 @@
 from flask import request, jsonify
 from app import app
+from app.models import users, categories, records
 
 #Base endpoint
 @app.route('/', methods=['GET'])
