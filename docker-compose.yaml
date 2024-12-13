@@ -10,3 +10,8 @@ services:
       PORT: "5000"
     ports:
       - "5000:8080"
+  db:
+    image: postgres:15.4-alpine3.18
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRESS_DB_NAME}
