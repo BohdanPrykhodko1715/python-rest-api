@@ -1,5 +1,11 @@
 # Expense Tracking REST API
 
+## Визначення варіанту
+
+* Номер групи - 22 
+* 22 % 3 = 1 - **Валюти**
+
+
 ## Setup
 
 1. Clone the repository:
