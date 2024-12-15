@@ -1,24 +1,23 @@
-def create_user_schema():
-    return {
-        "id": None,
-        "name": ""
-    }
+from flask_sqlalchemy import SQLAlchemy
+from app import db
 
-def create_category_schema():
-    return {
-        "id": None,  # unique identifier for the category
-        "name": ""  # name of the category
-    }
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
 
-def create_record_schema():
-    return {
-        "id": None,  # unique identifier for the record
-        "user_id": None,  # ID of the associated user
-        "category_id": None,  # ID of the associated category
-        "date": "",  # date of the record
-        "amount": 0.0  # amount spent
-    }
+class Category(db.Model):
+    __tablename__ = 'categories'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
 
-users = []
-categories = []
-records = []
+
+class Record(db.Model):
+    __tablename__ = 'records'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
+    date = db.Column(db.DateTime, nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    user = db.relationship('User')
+    category = db.relationship('Category')
