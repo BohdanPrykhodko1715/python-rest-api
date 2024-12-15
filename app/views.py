@@ -48,7 +48,7 @@ def create_currency(data):
 @bp.route('/currencies', methods=['GET'])
 @bp.response(200, CurrencySchema(many=True))
 def get_categories():
-    return Category.query.all()
+    return Currency.query.all()
 
 # Record Endpoints
 @bp.route('/records', methods=['POST'])
