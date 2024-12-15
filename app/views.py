@@ -1,7 +1,7 @@
 from flask_smorest import Blueprint
 from marshmallow import ValidationError
-from app.models import db, User, Category, Record
-from app.schemas import UserSchema, CategorySchema, RecordSchema
+from app.models import db, User, Category, Currency, Record
+from app.schemas import UserSchema, CategorySchema, CurrencySchema, RecordSchema
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -32,6 +32,21 @@ def create_category(data):
 
 @bp.route('/categories', methods=['GET'])
 @bp.response(200, CategorySchema(many=True))
+def get_categories():
+    return Category.query.all()
+
+# Currency Endpoints
+@bp.route('/currencies', methods=['POST'])
+@bp.arguments(CurrencySchema)
+@bp.response(201, CurrencySchema)
+def create_currency(data):
+    currency = Currency(**data)
+    db.session.add(currency)
+    db.session.commit()
+    return currency
+
+@bp.route('/currencies', methods=['GET'])
+@bp.response(200, CurrencySchema(many=True))
 def get_categories():
     return Category.query.all()
 
