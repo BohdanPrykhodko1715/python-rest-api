@@ -1,50 +1,67 @@
-from flask import request, jsonify
-from app import app
-from app.models import users, categories, records
+from flask_smorest import Blueprint
+from marshmallow import ValidationError
+from app.models import db, User, Category, Record
+from app.schemas import UserSchema, CategorySchema, RecordSchema
 
-#Base endpoint
-@app.route('/', methods=['GET'])
-def base_endpoint():
-    return jsonify({"message": "Welcome to Expense Tracking REST API"}), 200
+bp = Blueprint('api', __name__, url_prefix='/api')
 
 # User Endpoints
-@app.route('/users', methods=['POST'])
-def create_user():
-    user = request.json
-    user['id'] = len(users) + 1
-    users.append(user)
-    return jsonify({"message": "User created", "user": user}), 201
+@bp.route('/users', methods=['POST'])
+@bp.arguments(UserSchema)
+@bp.response(201, UserSchema)
+def create_user(data):
+    user = User(**data)
+    db.session.add(user)
+    db.session.commit()
+    return user
 
-@app.route('/users', methods=['GET'])
+@bp.route('/users', methods=['GET'])
+@bp.response(200, UserSchema(many=True))
 def get_users():
-    return jsonify({"users": users})
+    return User.query.all()
 
 # Category Endpoints
-@app.route('/categories', methods=['POST'])
-def create_category():
-    category = request.json
-    category['id'] = len(categories) + 1
-    categories.append(category)
-    return jsonify({"message": "Category created", "category": category}), 201
+@bp.route('/categories', methods=['POST'])
+@bp.arguments(CategorySchema)
+@bp.response(201, CategorySchema)
+def create_category(data):
+    category = Category(**data)
+    db.session.add(category)
+    db.session.commit()
+    return category
 
-@app.route('/categories', methods=['GET'])
+@bp.route('/categories', methods=['GET'])
+@bp.response(200, CategorySchema(many=True))
 def get_categories():
-    return jsonify({"categories": categories})
+    return Category.query.all()
 
 # Record Endpoints
-@app.route('/records', methods=['POST'])
-def create_record():
-    record = request.json
-    record['id'] = len(records) + 1
-    records.append(record)
-    return jsonify({"message": "Record created", "record": record}), 201
+@bp.route('/records', methods=['POST'])
+@bp.arguments(RecordSchema)
+@bp.response(201, RecordSchema)
+def create_record(data):
+    record = Record(**data)
+    db.session.add(record)
+    db.session.commit()
+    return record
 
-@app.route('/records/user/<int:user_id>', methods=['GET'])
+@bp.route('/records/user/<int:user_id>', methods=['GET'])
+@bp.response(200, RecordSchema(many=True))
 def get_user_records(user_id):
-    user_records = [record for record in records if record['user_id'] == user_id]
-    return jsonify({"records": user_records})
+    category_records = Record.query.filter_by(user_id=user_id).all()
+    return category_records
 
-@app.route('/records/category/<int:category_id>/user/<int:user_id>', methods=['GET'])
+@bp.route('/records/category/<int:category_id>/user/<int:user_id>', methods=['GET'])
+@bp.response(200, RecordSchema(many=True))
 def get_category_records(user_id, category_id):
-    category_records = [record for record in records if record['category_id'] == category_id and record['user_id'] == user_id]
-    return jsonify({"records": category_records})
+    category_records = Record.query.filter_by(category_id=category_id, user_id=user_id).all()
+    return category_records
+
+@bp.errorhandler(ValidationError)
+def handle_validation_error(e):
+    return {"message": str(e)}, 400
+
+@bp.errorhandler(Exception)
+def handle_exception(e):
+    print(e)
+    return {"message": "An internal error occured.", "error": str(e)}, 500
